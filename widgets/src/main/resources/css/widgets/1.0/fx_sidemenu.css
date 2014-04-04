@@ -1,0 +1,76 @@
+.fx-sidebar.affix {
+    position: static;
+}
+@media (min-width: 768px) {
+    .fx-sidebar {
+        padding-left: 20px;
+    }
+}
+.fx-sidenav {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+.fx-sidebar .nav > li > a {
+    color: #999999;
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 20px;
+}
+.fx-sidebar .nav > li > a:hover, .fx-sidebar .nav > li > a:focus {
+    background-color: rgba(0, 0, 0, 0);
+    border-left: 1px solid #563D7C;
+    color: #563D7C;
+    padding-left: 19px;
+    text-decoration: none;
+}
+.fx-sidebar .nav > .active > a, .fx-sidebar .nav > .active:hover > a, .fx-sidebar .nav > .active:focus > a {
+    background-color: rgba(0, 0, 0, 0);
+    border-left: 2px solid #563D7C;
+    color: #563D7C;
+    font-weight: 700;
+    padding-left: 18px;
+}
+.fx-sidebar .nav .nav {
+    display: none;
+    padding-bottom: 10px;
+}
+.fx-sidebar .nav .nav > li > a {
+    font-size: 12px;
+    font-weight: 400;
+    padding-bottom: 1px;
+    padding-left: 30px;
+    padding-top: 1px;
+}
+.fx-sidebar .nav .nav > li > a:hover, .fx-sidebar .nav .nav > li > a:focus {
+    padding-left: 29px;
+}
+.fx-sidebar .nav .nav > .active > a, .fx-sidebar .nav .nav > .active:hover > a, .fx-sidebar .nav .nav > .active:focus > a {
+    font-weight: 500;
+    padding-left: 28px;
+}
+
+@media (min-width: 992px) {
+    .fx-sidebar .nav > .active > ul {
+        display: block;
+    }
+    .fx-sidebar.affix, .fx-sidebar.affix-bottom {
+        width: 213px;
+    }
+    .fx-sidebar.affix {
+        position: fixed;
+        top: 20px;
+    }
+    .fx-sidebar.affix-bottom {
+        position: absolute;
+    }
+    .fx-sidebar.affix-bottom .fx-sidenav, .fx-sidebar.affix .fx-sidenav {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+}
+@media (min-width: 1200px) {
+    .fx-sidebar.affix-bottom, .fx-sidebar.affix {
+        width: 263px;
+    }
+}

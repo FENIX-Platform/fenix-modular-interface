@@ -1,0 +1,15 @@
+/*global define, window */
+
+define(["jquery"], function( $ ) {
+
+    function ToolContext(){}
+
+    ToolContext.prototype.initialize = function() {
+
+        console.log("ok")
+
+    };
+
+    return ToolContext;
+
+});

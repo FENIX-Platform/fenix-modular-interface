@@ -1,0 +1,108 @@
+{
+    "brand": {
+        "type": "brand",
+        "src" : "http://fenixapps.fao.org/repository/amis/css/img/amis-logo-india.png",
+        "alt" : "logo"
+    },
+    "left": [{
+        "type": "item",
+        "target": "example.html",
+        "labels": {
+            "EN": "Item EN",
+            "IT": "Item IT"
+        },
+        "attrs" : {
+            "data-custom" : "custom"
+        }
+    }],
+    "right": [
+        {
+            "type": "item",
+            "target": "example.html",
+            "labels": {
+                "EN": "Item EN",
+                "IT": "Item IT"
+            }
+        },
+        {
+            "type": "dropdown",
+            "labels": {
+                "EN": "Dropdown EN",
+                "IT": "Dropdown IT"
+            },
+            "children": [
+                {
+                    "type": "item",
+                    "target": "example.html",
+                    "labels": {
+                        "EN": "Sub 1 EN",
+                        "IT": "Sub 1 IT"
+                    }
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "item",
+                    "target": "example.html",
+                    "labels": {
+                        "EN": "Sub 2 EN",
+                        "IT": "Sub 3 IT"
+                    }
+                }
+
+            ],
+            "attrs" : {
+                "data-custom" : "custom"
+            }
+        },
+        {
+                "type": "search",
+                "placeholders": {
+                    "EN": "Placeholder EN",
+                    "IT": "Placeholder IT"
+                }
+            }
+
+    ],
+    "blanks": [
+        {
+            "type": "item",
+            "target": "example.html",
+            "labels": {
+                "EN": "Item EN",
+                "IT": "Item IT"
+            },
+            "attrs" : {
+                "data-custom" : "custom"
+            }
+        },
+        {
+            "type": "dropdown",
+            "labels": {
+                "EN": "Dropdown EN",
+                "IT": "Dropdown IT"
+            },
+            "children": [],
+            "attrs" : {
+                "data-custom" : "custom"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "brand",
+            "src" : "http://site.org/logo.png",
+            "alt" : "logo"
+        },
+        {
+            "type": "search",
+            "placeholders": {
+                "EN": "Placeholder EN",
+                "IT": "Placeholder IT"
+            }
+        }
+
+    ]
+}

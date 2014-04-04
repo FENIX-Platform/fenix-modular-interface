@@ -1,0 +1,82 @@
+{
+    "items": [
+        {
+            "labels": {
+                "EN": "FIRST EN",
+                "IT": "PRIMO IT"
+            },
+            "href": "#",
+            "children": [
+                {
+                    "labels": {
+                        "EN": "First EN",
+                        "IT": "Primo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                },
+                {
+                    "labels": {
+                        "EN": "Second EN",
+                        "IT": "Secondo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                }
+            ],
+            "attrs" : {
+                "data-semantic" : "mySemantic"
+            }
+        },
+        {
+            "labels": {
+                "EN": "SECOND EN",
+                "IT": "Second IT"
+            },
+            "href": "#",
+            "children": [
+                {
+                    "labels": {
+                        "EN": "First EN",
+                        "IT": "Primo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                },
+                {
+                    "labels": {
+                        "EN": "Second EN",
+                        "IT": "Secondo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                }
+            ]
+        },
+        {
+            "labels": {
+                "EN": "THIRD EN",
+                "IT": "Terzo IT"
+            },
+            "href": "#",
+            "children": [
+                {
+                    "labels": {
+                        "EN": "First EN",
+                        "IT": "Primo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                },
+                {
+                    "labels": {
+                        "EN": "Second EN",
+                        "IT": "Secondo IT"
+                    },
+                    "href": "#",
+                    "children": []
+                }
+            ]
+        }
+    ]
+}
