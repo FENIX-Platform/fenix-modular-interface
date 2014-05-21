@@ -12,7 +12,7 @@ requirejs.config({
     }
 });
 
-require(["IndexContext", "domReady!", "jquery" ], function(IndexContext){
+require(["IndexContext", "domReady!"], function(IndexContext){
 
     var indexContext = new IndexContext();
     indexContext.initialize();
