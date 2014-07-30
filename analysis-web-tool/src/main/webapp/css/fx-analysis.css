@@ -1,23 +1,141 @@
-/*================= Packry =================*/
- .fx-analysis-item {
-     width: 50%;
-     height: 50px;
-     background-color: red;
- }
+/* Fenix Analysis Module
+Produced By Fenix Team and Mentaltoy
+2014 All rights riserved */
+/* Animations */
+/* Fenix Colors */
+/* Typography */
+a {
+  color: red; }
+  a:hover {
+    color: blue;
+    -webkit-transition: all 0.3s ease 0s;
+    -moz-transition: all 0.3s ease 0s;
+    -ms-transition: all 0.3s ease 0s;
+    -o-transition: all 0.3s ease 0s;
+    transition: all 0.3s ease 0s; }
 
-/*================= Overlay =================*/
-#overlay {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.8)
-}
+/* Fenix Menu */
+/* Widgets container
+-------------------------------------------------- */
+.fx-widget {
+  background-color: #FFFFFF;
+  height: 100%;
+  padding: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #dddddd;
+  border-bottom: 3px solid #dddddd;
+  position: relative; }
 
-.closeOverlay {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
+.fx-widget:before {
+  content: "";
+  height: 1px;
+  background-color: #dddddd;
+  width: 100%;
+  position: absolute;
+  top: 56px;
+  left: 0px; }
+
+.fx-widget-chart-container {
+  position: relative;
+  width: 500px;
+  height: 350px; }
+
+.fx-widget .nav > li > a {
+  padding: 3px; }
+
+.fx-icon {
+  width: 35px;
+  height: 35px;
+  display: inline-block; }
+
+.fx-handle {
+  cursor: move;
+  position: relative;
+  top: 4px;
+  height: 29px;
+  width: 128px;
+  background: url("img/drag.png"); }
+
+/* Icons Standard state */
+.fx-icon-clone {
+  background: url("img/icons-sprite.png") no-repeat -350px 0px; }
+
+.fx-icon-remove {
+  background: url("img/icons-sprite.png") no-repeat -385px 0px; }
+
+.fx-icon-resize {
+  background: url("img/icons-sprite.png") no-repeat -210px 0px; }
+
+.fx-icon-movetosession {
+  background: url("img/icons-sprite.png") no-repeat -315px 0px; }
+
+.fx-icon-metadata {
+  background: url("img/icons-sprite.png") no-repeat 0px 0px; }
+
+.fx-icon-map {
+  background: url("img/icons-sprite.png") no-repeat -280px 0px; }
+
+.fx-icon-table {
+  background: url("img/icons-sprite.png") no-repeat -175px 0px; }
+
+.fx-icon-chart {
+  background: url("img/icons-sprite.png") no-repeat -35px 0px; }
+
+.fx-icon-download {
+  background: url("img/icons-sprite.png") no-repeat -245px 0px; }
+
+.fx-icon-add {
+  background: url("img/icons-sprite.png") no-repeat -455px 0px; }
+
+.fx-icon-data {
+  background: url("img/icons-sprite.png") no-repeat -490px 0px; }
+
+.fx-icon-metadata {
+  background: url("img/icons-sprite.png") no-repeat -525px 0px; }
+
+/* Icons Over state */
+.fx-icon-clone:hover {
+  background: url("img/icons-sprite.png") no-repeat -350px -35px; }
+
+.fx-icon-remove:hover {
+  background: url("img/icons-sprite.png") no-repeat -385px -35px; }
+
+.fx-icon-resize:hover {
+  background: url("img/icons-sprite.png") no-repeat -210px -35px; }
+
+.fx-icon-movetosession:hover {
+  background: url("img/icons-sprite.png") no-repeat -315px -35px; }
+
+.fx-icon-metadata:hover {
+  background: url("img/icons-sprite.png") no-repeat 0px -35px; }
+
+.fx-icon-map:hover {
+  background: url("img/icons-sprite.png") no-repeat -280px -35px; }
+
+.fx-icon-table:hover {
+  background: url("img/icons-sprite.png") no-repeat -175px -35px; }
+
+.fx-icon-chart:hover {
+  background: url("img/icons-sprite.png") no-repeat -35px -35px; }
+
+.fx-icon-download:hover {
+  background: url("img/icons-sprite.png") no-repeat -245px -35px; }
+
+.fx-icon-add:hover {
+  background: url("img/icons-sprite.png") no-repeat -455px -35px; }
+
+.fx-icon-data:hover {
+  background: url("img/icons-sprite.png") no-repeat -490px -35px; }
+
+.fx-icon-metadata:hover {
+  background: url("img/icons-sprite.png") no-repeat -525px -35px; }
+
+/******************************************************* Menu **/
+/* Small devices (tablets, 768px and up) */
+/****************************************************************************************************************************************************************/
+/* Medium devices (desktops, 992px and up) */
+/****************************************************************************************************************************************************************/
+/* Large devices (large desktops, 1200px and up) */
+/****************************************************************************************************************************************************************/

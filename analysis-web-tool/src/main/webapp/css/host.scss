@@ -1,0 +1,52 @@
+@import 'colors'; /* Imported by Analysis, should be deleted HASAP */
+
+html, body {
+  height: 100%;
+}
+
+
+body{
+  padding-top: 70px;
+}
+
+
+
+#overlay {
+  padding-top: 70px;
+  z-index: 500;
+  overflow-y: scroll;
+}
+
+
+/*================= Packry =================*/
+.fx-analysis-item {
+  width: 50%;
+  background-color: red;
+}
+
+/*================= Overlay =================*/
+
+/* Please review */
+
+#overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  background-color: $white-alpha;
+  .overlay-content{
+    height: 100%;
+   #catalogContainer{
+     height: 100%
+   }
+  }
+
+}
+
+.closeOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
