@@ -1,4 +1,2 @@
-fenix-analysis-web-tool
-=======================
-
-FENIX Analysis Web Tool
+FENIX fenix-catalog-bridge
+==========================

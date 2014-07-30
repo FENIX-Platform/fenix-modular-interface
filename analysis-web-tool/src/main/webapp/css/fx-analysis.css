@@ -1,0 +1,23 @@
+/*================= Packry =================*/
+ .fx-analysis-item {
+     width: 50%;
+     height: 50px;
+     background-color: red;
+ }
+
+/*================= Overlay =================*/
+#overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.8)
+}
+
+.closeOverlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+}

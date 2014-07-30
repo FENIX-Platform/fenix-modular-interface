@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>FENIX Analysis</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="FENIX Catalog Interface">
+    <meta name="author" content="Daniele Salvatore <daniele.salvatore[at]fao.org>">
+
+    <!-- Bootstrap + Font Awesome-->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+    <!-- FENIX CSS -->
+    <link rel="stylesheet" href='css/modular-catalog.css'/>
+    <link rel="stylesheet" href='css/iThing-min.css'/>
+
+    <link rel="stylesheet" href='http://fenixapps.fao.org/repository/js/jqwidgets/3.1/styles/jqx.base.css'/>
+
+    <link type="text/css" rel="stylesheet"
+          href="http://fonts.googleapis.com/css?family=Roboto:300,400,700,900U|Roboto+Condensed">
+    <link rel="stylesheet" href='css/pnotify.css'/>
+    <link rel="stylesheet" href='css/nprogress.css'/>
+
+    <link href="css/mbExtruder.css" media="all" rel="stylesheet" type="text/css">
+
+    <link href="css/fx-analysis.css" media="all" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+
+    <div class="container">
+
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">FENIX</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Analysis</a></li>
+                        <li><a href="#">Data Management</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">One more separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+
+        <div class="row">
+
+            <div class="col-xs-12 well">
+                <h1>FENIX - Data Analysis</h1>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum nulla arcu, pellentesque et eleifend eget, viverra eget lacus. Ut et tempor ligula. Sed pharetra nisl nisi, quis blandit eros fermentum et. Vivamus felis augue, commodo vitae laoreet at, porttitor ut justo. Aliquam erat volutpat. Pellentesque dignissim ligula quis metus gravida mattis. Sed vel hendrerit leo. Etiam fermentum mattis justo non rutrum. Nam dui mauris, vestibulum at lectus eget, molestie euismod tortor. Donec ac velit in mi dapibus venenatis. Duis at ipsum mi. Cras dictum enim nibh, in mattis nunc ullamcorper rutrum. Vivamus porttitor arcu nisi, non ullamcorper urna commodo ut. Sed porttitor congue euismod.</p>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-xs-6">
+                <button id="btn" type="button" class="btn btn-default">CATALOG</button>
+            </div>
+
+            <div class="col-xs-6">
+                <input id="fx-widgets-stack-btn" type='button' onclick='$("#fx-widgets-stack").openMbExtruder(true);' value='Open'>
+                <input type='button' onclick='$("#fx-widgets-stack").closeMbExtruder();' value='Close'>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-xs-12 well">
+               <div id="fx-ana-result-container"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FENIX Widgets Stack -->
+    <div id="fx-widgets-stack"></div>
+
+    <!-- FENIX Catalog Overlay -->
+    <div id="overlay">
+        <button class="closeOverlay">Close</button>
+
+        <div class="overlay-content">
+            <div id="catalogContainer"></div>
+        </div>
+    </div>
+
+    <!-- Javascript
+    ================================================== -->
+    <script data-main="js/main" src="js/lib/require.js"></script>
+
+</body>
+</html>
