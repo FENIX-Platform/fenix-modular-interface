@@ -24,9 +24,8 @@ define([
         this.ds = new DataSetRenderer();
     }
 
-    StackItemRenderer.prototype.getItem = function ( item ) {
-
-        return  this.ds.getItem(item);
+    StackItemRenderer.prototype.renderItem = function ( container, item ) {
+        this.ds.renderItem(container, item);
     };
 
     return StackItemRenderer;

@@ -38,7 +38,7 @@ define([
         var grid = new Grid().init({
             container: document.querySelector('#fx-ana-result-container'),
             drag: {
-                handle: '.fx-catalog-modular-form-handler',
+                handle: '.fx-handle',
                 containment: '#fx-ana-result-container'
             },
             config: {

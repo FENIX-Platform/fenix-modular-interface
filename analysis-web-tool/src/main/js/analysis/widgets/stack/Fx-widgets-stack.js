@@ -46,7 +46,6 @@ define([
 
     function FxWidgetsStack(options) {
         $.extend(true, o, defaultOptions, options);
-        this.renderer = new Renderer();
     }
 
     FxWidgetsStack.prototype.init = function (options) {
@@ -85,21 +84,21 @@ define([
         this.$panel.closeMbExtruder();
     };
 
-    FxWidgetsStack.prototype.createItem = function (item) {
+    FxWidgetsStack.prototype.createItem = function (container, item) {
 
-        return this.renderer.getItem();
+        return new Renderer().renderItem(container, item);
     };
 
     FxWidgetsStack.prototype.addItem = function (item) {
 
-        this.$panel.find(selectors.LIST).append(this.createItem(item));
+        var container = document.createElement('li');
+        this.$panel.find(selectors.LIST).append(container);
+        this.createItem( container, item);
         this.$panel.trigger(events.ADD_ITEM, [item]);
     };
 
     FxWidgetsStack.prototype.removeItem = function (item) {
-        var self = this;
         this.$panel.find($(item)).fadeOut('fast', function () {
-            self.trigger(events.ADD_ITEM, [item]);
             $(this).remove();
         });
     };

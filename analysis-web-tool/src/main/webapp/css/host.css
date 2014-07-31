@@ -15,6 +15,9 @@ body {
 .fx-analysis-item {
   width: 50%; }
 
+.fx-analysis-item.fit {
+  width: 100%; }
+
 /*================= Overlay =================*/
 /* Please review */
 #overlay {

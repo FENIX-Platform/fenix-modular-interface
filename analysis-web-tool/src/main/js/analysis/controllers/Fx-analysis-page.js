@@ -1,12 +1,37 @@
 /*global define */
 
 define([
+    'jquery',
     //'pnotify',
     //'lib/pnotify.nonblock',
     'lib/tweenmax'
-], function () {
+], function ($) {
 
-    function PageController() {
+    var defaultOptions = {
+        selectors: {
+            EVENTS_LISTENERS: 'body'
+        },
+        events: {
+            CREATE_PANEL: "",
+            ADD_ITEM: "",
+            CLONE_ITEM: 'cloneDeskItem',
+            REMOVE_ITEM: "removeItemFromDesk",
+            MINIMIZE_ITEM: "minimizeDeskItem",
+            MOVE_TO_DESK: "moveToDesk",
+            REMOVE_STACK: "removeStackItem"
+        },
+        storage: {
+            CATALOG: 'fx.catalog',
+            STACK: 'fx.stack'
+        }
+    };
+
+    function PageController(options) {
+
+        if (this.o === undefined) {
+            this.o = {};
+        }
+        $.extend(true, this.o, defaultOptions, options);
     }
 
     //(injected)
@@ -23,6 +48,77 @@ define([
 
     //(injected)
     PageController.prototype.bridge = undefined;
+
+    PageController.prototype.saveDeskToStorage = function (model) {
+
+        var that = this;
+
+        this.storage.getItem(this.o.storage.CATALOG, function (item) {
+            var a = JSON.parse(item) || [];
+            a.push(model.resources[0].metadata.uid);
+            that.storage.setItem(that.o.storage.CATALOG, JSON.stringify(a));
+        });
+    };
+
+    PageController.prototype.removeDeskItemFromStorage = function (model) {
+
+        var that = this;
+        this.storage.getItem(this.o.storage.CATALOG, function (item) {
+            var a = JSON.parse(item) || [];
+            var index = $.inArray(model.resources[0].metadata.uid, a);
+            a.splice(index, 1);
+            that.storage.setItem(that.o.storage.CATALOG, JSON.stringify(a));
+        });
+    };
+
+    PageController.prototype.loadDeskFromStorage = function () {
+        var that = this;
+        this.storage.getItem(this.o.storage.CATALOG, function (items) {
+            var datasets;
+
+            if (items) {
+                datasets = JSON.parse(items);
+                for (var i = 0; i < datasets.length; i++) {
+                    that.getData(datasets[i], $.proxy(that.addItemToDesk, that));
+                }
+            }
+        });
+    };
+
+    PageController.prototype.saveStackToStorage = function (model) {
+
+        var that = this;
+        this.storage.getItem(this.o.storage.STACK, function (item) {
+            var a = JSON.parse(item) || [];
+            a.push(model.resources[0].metadata.uid);
+            that.storage.setItem(that.o.storage.STACK, JSON.stringify(a));
+        });
+    };
+
+    PageController.prototype.loadSackFromStorage = function () {
+        var that = this;
+        this.storage.getItem(this.o.storage.STACK, function (items) {
+            var datasets;
+
+            if (items) {
+                datasets = JSON.parse(items);
+                for (var i = 0; i < datasets.length; i++) {
+                    that.getData(datasets[i], $.proxy(that.addItemToStack, that));
+                }
+            }
+        });
+    };
+
+    PageController.prototype.removeStackItemFromStorage = function (model) {
+
+        var that = this;
+        this.storage.getItem(this.o.storage.STACK, function (item) {
+            var a = JSON.parse(item) || [];
+            var index = $.inArray(model.resources[0].metadata.uid, a);
+            a.splice(index, 1);
+            that.storage.setItem(that.o.storage.STACK, JSON.stringify(a));
+        });
+    };
 
     PageController.prototype.initAnimation = function () {
 
@@ -70,41 +166,30 @@ define([
     };
 
     PageController.prototype.removeItemFromDesk = function (item) {
-
-        this.grid.removeItem(item);
+        this.desk.removeItem(item);
     };
 
     PageController.prototype.addItemToStack = function (item) {
-
         this.stack.addItem(item);
     };
 
     PageController.prototype.removeItemFromStack = function (item) {
-
         this.stack.removeItem(item);
     };
 
     PageController.prototype.loadSession = function () {
 
-        var self = this;
-
-        this.storage.getItem('fx.catalog', function (items) {
-            var datasets;
-
-            if (items) {
-                datasets = JSON.parse(items);
-                for (var i = 0; i < datasets.length; i++) {
-                    self.getData(datasets[i]);
-                }
-            }
-        });
+        //load Desk
+        this.loadDeskFromStorage();
+        //load Stack
+        this.loadSackFromStorage();
     };
 
-    PageController.prototype.getData = function (uid) {
+    PageController.prototype.getData = function (uid, callback) {
 
         var settings = {
             uid: uid,
-            success: $.proxy( this.addItemToDesk, this)
+            success: callback
         };
         this.bridge.query(settings);
     };
@@ -122,9 +207,39 @@ define([
 
         var that = this;
 
-        $('body').on('analyze', function (e, payload) {
+        $(this.o.selectors.EVENTS_LISTENERS).on('analyze', function (e, payload) {
             that.closeOverlay();
-            that.getData(payload)
+            that.getData(payload, $.proxy(that.addItemToDesk, that))
+        });
+
+        $(this.o.selectors.EVENTS_LISTENERS).on(this.o.events.CLONE_ITEM, function (e, model) {
+            that.saveDeskToStorage(model);
+            that.addItemToDesk(model);
+        });
+
+        $(this.o.selectors.EVENTS_LISTENERS).on(this.o.events.REMOVE_ITEM, function (e, container, model) {
+            that.removeDeskItemFromStorage(model);
+            that.removeItemFromDesk(container);
+        });
+
+        $(this.o.selectors.EVENTS_LISTENERS).on(this.o.events.MINIMIZE_ITEM, function (e, container, model) {
+            that.saveStackToStorage(model);
+            that.removeDeskItemFromStorage(model);
+
+            that.addItemToStack(model);
+            that.removeItemFromDesk(container);
+        });
+
+        $(this.o.selectors.EVENTS_LISTENERS).on(this.o.events.MOVE_TO_DESK, function (e, model, container) {
+            that.removeStackItemFromStorage(model);
+            that.saveDeskToStorage(model);
+            that.addItemToDesk(model);
+            that.removeItemFromStack(container);
+        });
+
+        $(this.o.selectors.EVENTS_LISTENERS).on(this.o.events.REMOVE_STACK, function (e, model, container) {
+            that.removeStackItemFromStorage(model);
+            that.removeItemFromStack(container);
         });
     };
 

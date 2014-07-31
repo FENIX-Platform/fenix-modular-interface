@@ -36,6 +36,7 @@ define([
         this.dsd = this.resource[this.o.DSD];
         this.visibleColumns = [];
         this.hiddenColumns = [];
+        this.columnsCodeMapping = {};
         this.columns = [];
         this.indexesToDelete = [];
         this.dataFields = [];
@@ -49,6 +50,13 @@ define([
         this.rawData = this.resource[this.o.DATA];
     };
 
+    DataSetRender.prototype.createMapCode = function (column) {
+        var map = {};
+        for (var i =0; i < column.length; i++){
+
+        }
+    };
+
     DataSetRender.prototype.processColumn = function (index, column) {
 
         if (column.hasOwnProperty(this.o.VALUES) && column[this.o.VALUES] !== null && column[this.o.VALUES].length <= 1) {
@@ -56,7 +64,11 @@ define([
             this.indexesToDelete.push(index);
         } else {
             this.visibleColumns.push(column);
-            this.dataFields.push({ name: column[this.o.COLUMN_ID], type: 'string' })
+            this.dataFields.push({ name: column[this.o.COLUMN_ID], type: 'string' });
+
+            if (column.dataType = "code"){
+                console.log(column)
+            }
         }
     };
 
@@ -72,6 +84,10 @@ define([
             //create jQWidgets model
             var d = {};
             for (j = 0; j < this.visibleColumns.length; j++) {
+
+                if (this.visibleColumns[j].dataType === 'code'){
+
+                }
                 d[this.dataFields[j].name] = this.rawData[i][j];
             }
 
