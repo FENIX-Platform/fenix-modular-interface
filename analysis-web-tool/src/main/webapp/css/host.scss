@@ -2,19 +2,19 @@
 
 html, body {
   height: 100%;
+
 }
 
+$host-menu-height : 70px;
 
 body{
-  padding-top: 70px;
+  padding-top: $host-menu-height;
 }
 
 
 
 #overlay {
-  padding-top: 70px;
-  z-index: 500;
-  overflow-y: scroll;
+
 }
 
 
@@ -39,6 +39,11 @@ body{
   height: 0;
   overflow: hidden;
   background-color: $white-alpha;
+
+  padding-top: $host-menu-height;
+  z-index: 500;
+  overflow-y: scroll;
+
   .overlay-content{
     height: 100%;
    #catalogContainer{
@@ -50,6 +55,5 @@ body{
 
 .closeOverlay {
   position: absolute;
-  top: 0;
   right: 0;
 }

@@ -182,7 +182,8 @@ define([
             {
                 width: '100%',
                 source: dataAdapter,
-                columns: this.getColumns()
+                columns: this.getColumns(),
+                theme: "fenix"
             });
 
     };
