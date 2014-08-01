@@ -1,21 +1,21 @@
 <div class='fx-widget'>
     <ul class="nav nav-tabs" role="tablist">
-        <li>
+        <li data-tab="metadata">
             <a data-toggle="tab" href="#metadata_REPLACE">
                 <span class="fx-icon fx-icon-metadata"></span>
             </a>
         </li>
-        <li>
+        <li data-tab="map">
             <a data-toggle="tab" href="#map_REPLACE">
                 <span class="fx-icon fx-icon-map"></span>
             </a>
         </li>
-        <li class="active">
+        <li class="active" data-tab="table">
             <a data-toggle="tab" href="#table_REPLACE">
                 <span class="fx-icon fx-icon-table"></span>
             </a>
         </li>
-        <li class="dropdown">
+        <li class="dropdown" data-tab="charts">
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span class="fx-icon fx-icon-chart"></span> <b class="caret"></b>
             </a>
@@ -29,7 +29,7 @@
                 <li data-charttype='pie'><a data-toggle="tab" tabindex="-1" href="#piechart_REPLACE">Pie Chart</a></li>
             </ul>
         </li>
-        <li class="dropdown">
+        <li class="dropdown" data-tab="download">
             <a data-toggle="dropdown"><span class="fx-icon fx-icon-download"></span></a>
             <ul aria-labelledby="download-drop" role="menu" class="dropdown-menu">
                 <li><a tabindex="-1">CSV</a></li>
@@ -50,25 +50,25 @@
 
     <div class="tab-content">
         <div id="metadata_REPLACE" class="tab-pane fade in">
-            <p>Metadata</p>
+            <div class="tab-metadata-container"></div>
         </div>
         <div id="map_REPLACE" class="tab-pane fade in">
-            <div id="fenix-map_REPLACE" style="overflow: hidden; height: 350px;"></div>
+            <div class="tab-map-container"></div>
         </div>
         <div id="table_REPLACE" class="tab-pane fade in active">
-            <div id='fx-widget-table-content-REPLACE'></div>
+            <div class="tab-table-container"></div>
         </div>
         <div id="columnchart_REPLACE" class="tab-pane fade">
-            <div id="columnchart-content" class='fx-widget-chart-container'></div>
+            <div class="tab-columnchart-container"></div>
         </div>
         <div id="barchart_REPLACE" class="tab-pane fade">
-            <div id="barchart-content" class='fx-widget-chart-container'></div>
+            <div class="tab-barchart-container"></div>
         </div>
         <div id="linechart_REPLACE" class="tab-pane fade">
-            <div id="linechart-content" class='fx-widget-chart-container'></div>
+            <div class="tab-linechart-container"></div>
         </div>
         <div id="piechart_REPLACE" class="tab-pane fade">
-            <div id="piechart-content" class='fx-widget-chart-container'></div>
+            <div class="tab-piechart-container"></div>
         </div>
     </div>
 </div>

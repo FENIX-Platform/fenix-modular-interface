@@ -20,8 +20,6 @@ define([
             }
         },
         events: {
-            CREATE_PANEL: "",
-            ADD_ITEM: "",
             RESIZE_ITEM: "resizeDeskItem",
             CLONE_ITEM: 'cloneDeskItem',
             REMOVE_ITEM: "removeItemFromDesk",
@@ -47,11 +45,10 @@ define([
         this.initBlankTemplate(container);
 
         //TODO add logic to discriminate if the resource shown is a dataset, a codelist or else
-        //this.ds.renderItem(this,  this.model);
+        this.ds.renderItem(this.$template,  this.model);
     };
 
     GridItemRenderer.prototype.initBlankTemplate = function (container) {
-
 
         this.generateId();
 

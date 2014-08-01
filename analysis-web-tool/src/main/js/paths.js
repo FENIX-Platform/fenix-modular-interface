@@ -45,6 +45,10 @@ define(function () {
         var config = {
             paths: fullpaths,
             shim: {
+
+                'jqwidgets' : {
+                    deps: ['jquery']
+                },
                 'lib/mbExtruder': {
                     deps: ['jquery']
                 },

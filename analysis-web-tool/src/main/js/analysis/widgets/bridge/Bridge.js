@@ -22,7 +22,10 @@ define([
             context : this,
             contentType: 'application/json',
             data: o.body,
-            success: o.success
+            success: o.success,
+            error : function () {
+                alert("IPI-side Problems")
+            }
         });
     };
 
