@@ -30,7 +30,10 @@ define([
 
         this.$template = $(template);
 
+        console.log( this.$template)
+
         this.$template.find(this.o.selectors.MOVE_TO_DESk).on(this.o.interaction, {self: this}, function(e){
+            alert()
             $(this).trigger(e.data.self.o.events.MOVE_TO_DESK, [e.data.self.model, e.data.self.container])
         });
 

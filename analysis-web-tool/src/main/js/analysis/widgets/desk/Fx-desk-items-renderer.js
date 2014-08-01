@@ -42,6 +42,8 @@ define([
         this.model = model;
         this.$template = $(template);
 
+        this.initEventListeners();
+
         this.initBlankTemplate(container);
 
         //TODO add logic to discriminate if the resource shown is a dataset, a codelist or else
@@ -91,6 +93,13 @@ define([
 
         this.$template.find(this.o.selectors.buttons.MINIMIZE + this.id).on(this.o.interaction, {self: this}, function (e) {
             $(this).trigger(e.data.self.o.events.MINIMIZE_ITEM, [e.data.self.container.parentNode, e.data.self.model]);
+        });
+    };
+
+    GridItemRenderer.prototype.initEventListeners = function () {
+
+        this.$template.find('a[data-toggle="tab"]').on('shown.bs.tab', {self : this}, function (e) {
+            e.data.self.ds.buildChart($(e.target).data('chart'))
         });
     };
 

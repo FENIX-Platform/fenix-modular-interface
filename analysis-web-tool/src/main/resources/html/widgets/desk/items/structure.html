@@ -20,13 +20,11 @@
                 <span class="fx-icon fx-icon-chart"></span> <b class="caret"></b>
             </a>
             <ul aria-labelledby="charts-drop" role="menu" class="dropdown-menu">
-                <li data-charttype='columns'><a data-toggle="tab" tabindex="-1" href="#columnchart_REPLACE">Columns
-                    Chart</a></li>
-                <li data-charttype='bars'><a data-toggle="tab" tabindex="-1" href="#barchart_REPLACE">Bars Chart</a>
+                <li><a data-chart='area' data-toggle="tab" tabindex="-1" href="#areachart_REPLACE">Area Chart
+                </a></li>
+                <li><a data-chart='line' data-toggle="tab" tabindex="-1" href="#linechart_REPLACE">Lines Chart</a>
                 </li>
-                <li data-charttype='lines'><a data-toggle="tab" tabindex="-1" href="#linechart_REPLACE">Lines Chart</a>
-                </li>
-                <li data-charttype='pie'><a data-toggle="tab" tabindex="-1" href="#piechart_REPLACE">Pie Chart</a></li>
+                <!-- <li data-charttype='pie'><a data-toggle="tab" tabindex="-1" href="#piechart_REPLACE">Pie Chart</a></li> -->
             </ul>
         </li>
         <li class="dropdown" data-tab="download">
@@ -58,11 +56,8 @@
         <div id="table_REPLACE" class="tab-pane fade in active">
             <div class="tab-table-container"></div>
         </div>
-        <div id="columnchart_REPLACE" class="tab-pane fade">
-            <div class="tab-columnchart-container"></div>
-        </div>
-        <div id="barchart_REPLACE" class="tab-pane fade">
-            <div class="tab-barchart-container"></div>
+        <div id="areachart_REPLACE" class="tab-pane fade">
+            <div class="tab-areachart-container"></div>
         </div>
         <div id="linechart_REPLACE" class="tab-pane fade">
             <div class="tab-linechart-container"></div>

@@ -10,6 +10,9 @@ define([
 
     var defaultOptions = {
         interaction: "click",
+        label: {
+            UNDEFINED: 'undefined'
+        },
         RESOURCES: 'resources',
         DSD: 'dsd',
         COLUMNS: 'columns',
@@ -22,8 +25,7 @@ define([
                 METADATA: ".tab-metadata-container",
                 MAP: ".tab-map-container",
                 TABLE: ".tab-table-container",
-                COLUMN_CHART: ".tab-columnchart-container",
-                BAR_CHART: ".tab-barchart-container",
+                AREA_CHART: ".tab-areachart-container",
                 LINE_CHART: ".tab-linechart-container",
                 PIE_CHART: ".tab-piechart-container"
             }
@@ -37,11 +39,27 @@ define([
         $.extend(true, this.o, defaultOptions, options);
     }
 
-    DataSetRender.prototype.createMapCode = function (column) {
-        var map = {};
-        for (var i = 0; i < column.length; i++) {
+    DataSetRender.prototype.getSeries = function () {
 
+        var o = Object.keys(this.rawSeries);
+        for (var i = 0; i < o.length; i++) {
+            this.series.push(this.rawSeries[o[i]]);
         }
+    };
+
+    DataSetRender.prototype.updateSeries = function (row) {
+
+        this.rawSeries[row[this.itemIndex]].data.push(row[this.valueIndex]);
+
+    };
+
+    DataSetRender.prototype.createMapCode = function (values) {
+
+        var map = {};
+        for (var i = 0; i < values.length; i++) {
+            map[values[i].code] = this.getLabel(values[i], 'title');
+        }
+        return map;
     };
 
     DataSetRender.prototype.processColumn = function (index, column) {
@@ -53,19 +71,41 @@ define([
             this.visibleColumns.push(column);
             this.dataFields.push({ name: column[this.o.COLUMN_ID], type: 'string' });
 
-            if (column.dataType = "code") {
-                console.log(column)
+            if (column.dataType === "code") {
+                this.columnsCodeMapping[column.columnId] = this.createMapCode(column.values);
+            }
+
+            if (column.columnId === "TIME") {
+                this.xAxis = column.values;
+            }
+
+            if (column.columnId === "ITEM") {
+                this.itemIndex = index;
+            }
+            if (column.columnId === "VALUE") {
+                this.valueIndex = index;
+            }
+
+            if (column.columnId === "ITEM") {
+                var a = Object.keys(this.columnsCodeMapping[column.columnId]);
+                for (var i = 0; i < a.length; i++) {
+                    this.rawSeries[a[i]] = { name: this.columnsCodeMapping[column.columnId][a[i]], data: [] };
+                }
             }
         }
+
     };
 
     DataSetRender.prototype.getData = function () {
 
         for (var i = 0; i < this.rawData.length; i++) {
 
+            //generate Series
+            this.updateSeries(this.rawData[i]);
+
             //remove hidden columns
             for (var j = 0; j < this.indexesToDelete.length; j++) {
-                this.rawData[i].splice(this.indexesToDelete[j], 1)
+                this.rawData[i].splice(this.indexesToDelete[j] - j, 1)
             }
 
             //create jQWidgets model
@@ -73,9 +113,10 @@ define([
             for (j = 0; j < this.visibleColumns.length; j++) {
 
                 if (this.visibleColumns[j].dataType === 'code') {
-
+                    d[this.dataFields[j].name] = this.rawData[i][j] + ' - ' + this.columnsCodeMapping[this.visibleColumns[j].columnId][this.rawData[i][j]];
+                } else {
+                    d[this.dataFields[j].name] = this.rawData[i][j]
                 }
-                d[this.dataFields[j].name] = this.rawData[i][j];
             }
 
             this.data.push(d);
@@ -97,6 +138,7 @@ define([
         for (var i = 0; i < this.dataFields.length; i++) {
             var c = { datafield: this.dataFields[i].name};
             c.text = this.getColumnLabel(this.visibleColumns [i]);
+            c.width = ( 100 / this.dataFields.length ) + "%";
             this.columns.push(c);
         }
 
@@ -105,19 +147,19 @@ define([
 
     DataSetRender.prototype.getColumnLabel = function (column) {
 
-        var label =  this.getLabel(column, "title");
+        var label = this.getLabel(column, "title");
 
         if (label === null) {
             if (column.hasOwnProperty("dimension") && column.dimension !== null) {
                 label = this.getLabel(column.dimension, "title");
             }
         }
-        return label;
+        return label ? label : this.o.label.UNDEFINED;
     };
-    
+
     DataSetRender.prototype.getLabel = function (obj, attribute) {
 
-        var label= "not defined",
+        var label,
             keys;
 
         if (obj.hasOwnProperty(attribute) && obj.title !== null) {
@@ -139,9 +181,6 @@ define([
 
     DataSetRender.prototype.initInnerStructures = function () {
 
-        console.log(this.model)
-
-        //Select the first resource. We can create just one table here
         this.dsd = this.model[this.o.DSD];
         this.visibleColumns = [];
         this.hiddenColumns = [];
@@ -150,13 +189,17 @@ define([
         this.indexesToDelete = [];
         this.dataFields = [];
         this.rawColumns = this.dsd[this.o.COLUMNS];
+        this.data = [];
+        this.series = [];
+        this.rawSeries = {};
 
         for (var i = 0; i < this.rawColumns.length; i++) {
             this.processColumn(i, this.rawColumns[i]);
         }
 
-        this.data = [];
         this.rawData = this.model[this.o.DATA];
+        this.getData();
+        this.getSeries();
     };
 
     DataSetRender.prototype.activatePanels = function () {
@@ -170,7 +213,7 @@ define([
 
     DataSetRender.prototype.buildTable = function () {
 
-        var data = this.getData();
+        var data = this.data;
         // prepare the data
         var source = {
             datatype: "json",
@@ -188,57 +231,993 @@ define([
 
     };
 
-    DataSetRender.prototype.buildCharts = function () {
+    DataSetRender.prototype.buildPieChart = function () {
+
+        var conf =  {
+
+            //MTY ®
+
+            chart: {
+                type: 'pie', //Tipo di grafico:  area, areaspline, boxplot, bubble, column, line, pie, scatter, spline
+
+                    alignTicks: false,
+                    backgroundColor: '#FFFFFF', //Colore di background
+                    //borderColor: '#3fa8da', //Colore bordo intorno
+                    //borderWidth: 1, //Spessore bordo intorno
+                    //borderRadius: 0, //Smusso bordo intorno
+                    //margin: [5,5,5,5], //Margine intorno (vince sullo spacing)
+                    spacing: [20,1,1,1],//Spacing intorno (molto simile al margin - Di default il bottom è 15, qui l'ho messo a 10 per essere uguale agli altri)
+                    //plotBackgroundColor: 'red', //Colore di background solo area chart
+                    plotBorderColor: '#ffffff', //Colore bordo intorno solo area chart
+                    plotBorderWidth: 0, //Spessore bordo intorno solo area chart
+                    //showAxes: false, //Mostra gli assi quando le serie sono aggiunte dinamicamente
+                    style: {
+                    fontFamily: 'Roboto', // Font di tutto
+                        fontSize: '12px', // La dimensione qui vale solo per i titoli
+                        fontWeight: 300 // Con Roboto è molto bello giocare con i pesi
+                },
+                zoomType: 'xy', //Attiva lo zoom e stabilisce in quale dimensione
+                    //selectionMarkerFill: 'rgba(0,0,0,0.25)',//Colore di fonfo della selezione per lo zoom (trasparente per far vedere sotto)
+                    resetZoomButton: {
+                    position: {
+                        align: 'right', //Allineamento zoom orizzontale
+                            //verticalAlign:'middle' //Allineamento zoom verticale
+                            x: -10 //Posizione del pulsante rispetto all'allineamento (valori positivi > destra) e al PLOT
+
+                    },
+                    theme: {
+                        fill: '#FFFFFF', //Colore di background pulsante reset zoom
+                            stroke: '#666666', //Colore di stroke pulsante reset zoom
+                            width: 60, //Larghezza del pulsante reset
+                            //r:0, //Smusso pulsante reset zoom
+                            style: {
+                            textAlign: 'center', //CSS style aggiunto da me per centrare il testo
+                                fontSize: 10
+                        },
+                        states: {
+                            hover: {
+                                fill: '#e6e6e6', //Colore di background hover pulsante reset zoom
+                                    stroke: '#666666', //Colore di stroke hover pulsante reset zoom
+                                    style: {
+                                    //color: 'white' //Colore testo hover pulsante reset zoom
+                                }
+                            }
+                        }
+                    }
+
+                }
+            },
+            colors: [ //Colori delle charts
+                '#71a7d1',
+                '#b6d2e9',
+                '#dbeaf5',
+                '#b6d2e9',
+                '#95bddd'
+            ],
+                credits: {
+                enabled: false //Attiva o disattiva il link di HighCharts dalla chart
+            },
+            exporting: {
+                enabled: false
+            },
+            navigation: { //Modifica lo stile dei bottoni e spesso del solo bottone dell'esportazione (lo sfondo)
+                buttonOptions: {
+                    theme: {
+                        'stroke-width': 1, // Peso stroke del bottone
+                            stroke: '#666666', // Colore stroke del bottone
+                            r: 0, // Smusso stroke del bottone,
+                            states: {
+                            hover: {
+                                stroke: '#666666', // Press stroke del bottone
+                                    fill: '#e6e6e6' // Rollover del bottone
+                            },
+                            select: {
+                                stroke: '#666666', // Press stroke del bottone
+                                    fill: '#e6e6e6' // Press Fill del bottone
+                            }
+                        }
+                    }
+                }
+            },
+            legend: {
+                align: 'right',
+                    verticalAlign: 'middle',
+                    layout: 'vertical',
+
+                    itemMarginTop: 5,
+                    itemMarginBottom: 5,
+                    itemStyle: {
+                    cursor: 'pointer',
+                        color: '#666666',
+                        fontSize: '11px',
+                        fontWeight: 300
+                },
+                itemWidth: 150,
+                    itemHiddenStyle: { //Colore dell'elemento legenda quando è disattivato
+                    color: '#eeeeee'
+                },
+                itemHoverStyle: { //Colore dell'elemento legenda in rollover
+                    color: '#3ca7da'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    borderWidth: 1,
+                        startAngle: -45,
+                        dataLabels: {
+                        softConnector: false
+                    }
+                }
+            },
+            //END
+
+            title: {
+
+                text: this.getLabel(this.model.metadata, 'title'),
+                    x: -20 //center
+            },
+            subtitle: {
+                text: null,
+                    x: -20
+            },
+            tooltip: {
+                valueSuffix: 'M',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderWidth: 1,
+                    shadow: false
+            },
+            series: [{
+                name: 'Number of undernourished declining',
+                showInLegend: true,
+                data:  [
+                    ['Asia',     43],
+                    ['Europe',     14],
+                    ['Oceania',       4],
+                    ['Africa',    14],
+                    ['Americas',   25]
+
+                ]
+            }]
+        };
 
         var conf = {
+
+            //Line chart
+
+            chart: {
+                type: 'line', //Tipo di grafico:  area, areaspline, boxplot, bubble, column, line, pie, scatter, spline
+
+                alignTicks: false,
+                backgroundColor: '#FFFFFF', //Colore di background
+                //borderColor: '#3fa8da', //Colore bordo intorno
+                //borderWidth: 1, //Spessore bordo intorno
+                //borderRadius: 0, //Smusso bordo intorno
+                //margin: [5,5,5,5], //Margine intorno (vince sullo spacing)
+                spacing: [20, 1, 1, 1],//Spacing intorno (molto simile al margin - Di default il bottom è 15, qui l'ho messo a 10 per essere uguale agli altri)
+                //plotBackgroundColor: 'red', //Colore di background solo area chart
+                plotBorderColor: '#ffffff', //Colore bordo intorno solo area chart
+                plotBorderWidth: 0, //Spessore bordo intorno solo area chart
+                //showAxes: false, //Mostra gli assi quando le serie sono aggiunte dinamicamente
+                style: {
+                    fontFamily: 'Roboto', // Font di tutto
+                    fontSize: '12px', // La dimensione qui vale solo per i titoli
+                    fontWeight: 300 // Con Roboto è molto bello giocare con i pesi
+                },
+                zoomType: 'xy', //Attiva lo zoom e stabilisce in quale dimensione
+                //selectionMarkerFill: 'rgba(0,0,0,0.25)',//Colore di fonfo della selezione per lo zoom (trasparente per far vedere sotto)
+                resetZoomButton: {
+                    position: {
+                        align: 'right', //Allineamento zoom orizzontale
+                        //verticalAlign:'middle' //Allineamento zoom verticale
+                        x: -10 //Posizione del pulsante rispetto all'allineamento (valori positivi > destra) e al PLOT
+
+                    },
+                    theme: {
+                        fill: '#FFFFFF', //Colore di background pulsante reset zoom
+                        stroke: '#666666', //Colore di stroke pulsante reset zoom
+                        width: 60, //Larghezza del pulsante reset
+                        //r:0, //Smusso pulsante reset zoom
+                        style: {
+                            textAlign: 'center', //CSS style aggiunto da me per centrare il testo
+                            fontSize: 10
+                        },
+                        states: {
+                            hover: {
+                                fill: '#e6e6e6', //Colore di background hover pulsante reset zoom
+                                stroke: '#666666', //Colore di stroke hover pulsante reset zoom
+                                style: {
+                                    //color: 'white' //Colore testo hover pulsante reset zoom
+                                }
+                            }
+                        }
+                    }
+
+                }
+            },
+            colors: [ //Colori delle charts
+                '#379bcd',
+                '#76BE94',
+                '#744490',
+                '#E10079',
+                '#2D1706',
+                '#F1E300',
+                '#F7AE3C',
+                '#DF3328'
+            ],
+            credits: {
+                enabled: false //Attiva o disattiva il link di HighCharts dalla chart
+            },
+            exporting: {
+                enabled: false
+            },
+            navigation: { //Modifica lo stile dei bottoni e spesso del solo bottone dell'esportazione (lo sfondo)
+                buttonOptions: {
+                    theme: {
+                        'stroke-width': 1, // Peso stroke del bottone
+                        stroke: '#666666', // Colore stroke del bottone
+                        r: 0, // Smusso stroke del bottone,
+                        states: {
+                            hover: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Rollover del bottone
+                            },
+                            select: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Press Fill del bottone
+                            }
+                        }
+                    }
+                }
+            },
+            legend: { //Modifica style della legenda
+                enabled: true, //Attiva la legenda
+                floating: false, // IMPORTANTE - Permette alla plot area di stare sotto alla legenda - si guadagna molto spazio
+
+                //margin: 100, //Margine dell'intero blocco legenda dall'area di PLOT (Solo quando non è floating)
+                //padding: 20, //Padding del box legenda (Ingrandisce il box)
+                backgroundColor: '#FFFFFF', //Colore di sfondo della legenda
+                //layout: 'horizontal', //Tipologia di legenda
+                align: 'center', //Allineamento orizzontale del box della legenda (left, center, right)
+                verticalAlign: 'bottom', //allineamento verticale della legenda (top, middle, bottom)
+                //width: 200, //Larghezza della legenda (Aggiunge Margini e padding)
+                //x: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > destra)
+                //y: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > verso il basso)
+                //maxHeight: 90, //IMPORTANTE - Indica l'altezza massima della legenda, se superata, mostra la paginazione (vedi sotto)
+                //borderColor: '#666666', //Colore del bordo della legenda
+                borderWidth: 0, //Spessore bordo della legenda
+                //borderRadius: 3, //Smusso della legenda
+                //itemDistance: 10, //Distanza X degli elementi quando la legenda è in verticale
+                //symbolWidth: 20, //Larghezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 16)
+                //symbolHeight: 20, //Altezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 12)
+                //symbolRadius: 3, //Smusso del simbolo rettangolo quando la legenda ne ha uno (default 2)
+                symbolPadding: 10, //Distanza tra simbolo e legenda (default 5)
+                //itemMarginBottom: 5, //Margine inferiore di ogni elemento della legenda
+                //itemMarginTop: 5, //Margine superiore di ogni elemento della legenda
+                //lineHeight: 20, //Altezza di ogni elemento della legenda (il valore di default è 16)
+                itemStyle: {
+                    cursor: 'pointer',
+                    color: '#666666',
+                    fontSize: '14px',
+                    fontWeight: 300
+                },
+                itemHiddenStyle: { //Colore dell'elemento legenda quando è disattivato
+                    color: '#eeeeee'
+                },
+                itemHoverStyle: { //Colore dell'elemento legenda in rollover
+                    color: '#3ca7da'
+                },
+                navigation: { //Paginazione Legenda - stilizzazione
+                    activeColor: '#3ca7da', //Colore freccia attiva legenda
+                    inactiveColor: '#666666', //Colore freccia disattiva legenda
+                    arrowSize: 8, //Dimensioni freccia
+                    animation: true, //Attiva/Disattiva animazione
+                    style: { //Stile CSS applicato solo alla navigazione della legenda
+                        color: '#666666',
+                        fontSize: '10px'
+                    }
+                }
+            },
+            plotOptions: {
+                series: {
+                    allowPointSelect: true, //Permette di selezionare i punti della chart
+                    //pointPlacement: "on", Per partire dall'origine
+                    animation: { // Configura l'animazione di entrata
+                        duration: 1000,
+                        easing: 'swing'
+                    },
+                    connectNulls: true,
+                    cropThreshold: 3,
+                    lineWidth: 1, // IMPORTANTE - Cambia lo spessore delle linee della chart
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    fillColor: {
+                        linearGradient: [0, 0, 0, 350],
+                        stops: [
+                            [0, 'rgba(55, 155, 205,0.5)'],
+                            [1, 'rgba(255,255,255,0)']
+                        ]
+                    },
+                    marker: {
+                        enabled: false, //Attiva o disattiva i marker
+                        //symbol: 'url(http://www.mentaltoy.com/resources/logoChart.png)', //Questo paramentro carica un simbolo personalizzato. Si può anche avere una chart con marker diverse sulle linee
+                        symbol: 'circle', // Tipologia di marker
+                        radius: 4,
+                        lineWidth: 1,
+                        lineColor: '#379bcd',
+                        fillColor: '#FFFFFF',
+                        states: {
+                            hover: {
+                                enabled: true, // Attiva o disattiva il marker quando si passa sopra la chart
+                                symbol: 'circle',
+                                fillColor: '#FFFFFF',
+                                lineColor: '#3ca7da',
+                                radius: 5,
+                                lineWidth: 2
+                            }
+                        }
+                    }
+                    //cursor: 'cell',// Cambia il cursore on rollover del grafico
+                    //dashStyle: 'ShortDash', //Tipologia di linea (Solid ShortDash ShortDot ShortDashDot ShortDashDotDot Dot Dash LongDash DashDot LongDashDot LongDashDotDot)
+                    /*dataLabels: {
+                     enabled: true, //Attiva le label sopra i punti nel grafico
+                     backgroundColor: '#FFFFFF',
+                     borderRadius: 3,
+                     borderWidth: 1,
+                     borderColor: '#666666'
+
+                     },*/
+                    /*events: {// Aggiunge eventi alla chart
+                     show: function(event) { //Aggiunge evento di quando un elemnto ricompare cliccandolo dalla legenda
+                     alert ('The series was just shown');
+                     }
+                     },*/
+
+                }
+            },
+            //END
+
+
             title: {
-                text: 'Monthly Average Temperature',
+                //enabled: false,
+                text: this.getLabel(this.model.metadata, 'title'),
                 x: -20 //center
             },
+            subtitle: {
+                text: null,
+                x: -20
+            },
             xAxis: {
-                categories: [2000, 2001, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct']
+                categories: this.xAxis,
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineColor: '#e0e0e0',
+                tickColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                tickLength: 7,
+                //tickmarkPlacement: 'on', Per partire dall'origine
+                labels: {
+                    y: 25,
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                }
+                /*plotLines: [{ //linea custom possono essere anche più di una, è un array
+                 color: '#666666',
+                 width: 1,
+                 value: 11.5,
+                 dashStyle: 'dash',
+                 zIndex: 3
+                 }, { //linea custom possono essere anche più di una, è un array
+                 color: '#FFFFFF',
+                 width: 1,
+                 value: 11.5,
+                 zIndex: 2
+                 }]*/
             },
             yAxis: {
+
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineWidth: 1,
+                //tickWidth: 1,
+                lineColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                labels: {
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                },
                 title: {
-                    text: 'Quantity'
+                    enabled: false,
+                    text: 'null'
                 },
                 plotLines: [
                     {
                         value: 0,
-                        width: 1,
-                        color: '#808080'
+                        width: 1
                     }
                 ]
             },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle',
-                borderWidth: 0
+            tooltip: {
+                valueSuffix: 'M',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderWidth: 1,
+                shadow: false
             },
-            series: [
-                {
-                    name: 'Tokyo',
-                    data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-                },
-                {
-                    name: 'New York',
-                    data: [-0.2, 0.8, 5.7, 11.3, 17.0, 22.0, 24.8, 24.1, 20.1, 14.1, 8.6, 2.5]
-                },
-                {
-                    name: 'Berlin',
-                    data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
-                },
-                {
-                    name: 'London',
-                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-                }
-            ]
+            series: this.series
         };
 
-        this.$template.find(this.o.selectors.content.COLUMN_CHART).highcharts(conf);
+        this.$template.find(this.o.selectors.content.PIE_CHART).highcharts(conf);
 
+    };
+
+    DataSetRender.prototype.buildAreaChart = function () {
+
+        var conf = {
+
+            //Line chart
+
+            chart: {
+                type: 'area', //Tipo di grafico:  area, areaspline, boxplot, bubble, column, line, pie, scatter, spline
+
+                alignTicks: false,
+                backgroundColor: '#FFFFFF', //Colore di background
+                //borderColor: '#3fa8da', //Colore bordo intorno
+                //borderWidth: 1, //Spessore bordo intorno
+                //borderRadius: 0, //Smusso bordo intorno
+                //margin: [5,5,5,5], //Margine intorno (vince sullo spacing)
+                spacing: [20, 1, 1, 1],//Spacing intorno (molto simile al margin - Di default il bottom è 15, qui l'ho messo a 10 per essere uguale agli altri)
+                //plotBackgroundColor: 'red', //Colore di background solo area chart
+                plotBorderColor: '#ffffff', //Colore bordo intorno solo area chart
+                plotBorderWidth: 0, //Spessore bordo intorno solo area chart
+                //showAxes: false, //Mostra gli assi quando le serie sono aggiunte dinamicamente
+                style: {
+                    fontFamily: 'Roboto', // Font di tutto
+                    fontSize: '12px', // La dimensione qui vale solo per i titoli
+                    fontWeight: 300 // Con Roboto è molto bello giocare con i pesi
+                },
+                zoomType: 'xy', //Attiva lo zoom e stabilisce in quale dimensione
+                //selectionMarkerFill: 'rgba(0,0,0,0.25)',//Colore di fonfo della selezione per lo zoom (trasparente per far vedere sotto)
+                resetZoomButton: {
+                    position: {
+                        align: 'right', //Allineamento zoom orizzontale
+                        //verticalAlign:'middle' //Allineamento zoom verticale
+                        x: -10 //Posizione del pulsante rispetto all'allineamento (valori positivi > destra) e al PLOT
+
+                    },
+                    theme: {
+                        fill: '#FFFFFF', //Colore di background pulsante reset zoom
+                        stroke: '#666666', //Colore di stroke pulsante reset zoom
+                        width: 60, //Larghezza del pulsante reset
+                        //r:0, //Smusso pulsante reset zoom
+                        style: {
+                            textAlign: 'center', //CSS style aggiunto da me per centrare il testo
+                            fontSize: 10
+                        },
+                        states: {
+                            hover: {
+                                fill: '#e6e6e6', //Colore di background hover pulsante reset zoom
+                                stroke: '#666666', //Colore di stroke hover pulsante reset zoom
+                                style: {
+                                    //color: 'white' //Colore testo hover pulsante reset zoom
+                                }
+                            }
+                        }
+                    }
+
+                }
+            },
+            colors: [ //Colori delle charts
+                '#379bcd',
+                '#76BE94',
+                '#744490',
+                '#E10079',
+                '#2D1706',
+                '#F1E300',
+                '#F7AE3C',
+                '#DF3328'
+            ],
+            credits: {
+                enabled: false //Attiva o disattiva il link di HighCharts dalla chart
+            },
+            exporting: {
+                enabled: false
+            },
+            navigation: { //Modifica lo stile dei bottoni e spesso del solo bottone dell'esportazione (lo sfondo)
+                buttonOptions: {
+                    theme: {
+                        'stroke-width': 1, // Peso stroke del bottone
+                        stroke: '#666666', // Colore stroke del bottone
+                        r: 0, // Smusso stroke del bottone,
+                        states: {
+                            hover: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Rollover del bottone
+                            },
+                            select: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Press Fill del bottone
+                            }
+                        }
+                    }
+                }
+            },
+            legend: { //Modifica style della legenda
+                enabled: true, //Attiva la legenda
+                floating: false, // IMPORTANTE - Permette alla plot area di stare sotto alla legenda - si guadagna molto spazio
+
+                //margin: 100, //Margine dell'intero blocco legenda dall'area di PLOT (Solo quando non è floating)
+                //padding: 20, //Padding del box legenda (Ingrandisce il box)
+                backgroundColor: '#FFFFFF', //Colore di sfondo della legenda
+                //layout: 'horizontal', //Tipologia di legenda
+                align: 'center', //Allineamento orizzontale del box della legenda (left, center, right)
+                verticalAlign: 'bottom', //allineamento verticale della legenda (top, middle, bottom)
+                //width: 200, //Larghezza della legenda (Aggiunge Margini e padding)
+                //x: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > destra)
+                //y: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > verso il basso)
+                //maxHeight: 90, //IMPORTANTE - Indica l'altezza massima della legenda, se superata, mostra la paginazione (vedi sotto)
+                //borderColor: '#666666', //Colore del bordo della legenda
+                borderWidth: 0, //Spessore bordo della legenda
+                //borderRadius: 3, //Smusso della legenda
+                //itemDistance: 10, //Distanza X degli elementi quando la legenda è in verticale
+                //symbolWidth: 20, //Larghezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 16)
+                //symbolHeight: 20, //Altezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 12)
+                //symbolRadius: 3, //Smusso del simbolo rettangolo quando la legenda ne ha uno (default 2)
+                symbolPadding: 10, //Distanza tra simbolo e legenda (default 5)
+                //itemMarginBottom: 5, //Margine inferiore di ogni elemento della legenda
+                //itemMarginTop: 5, //Margine superiore di ogni elemento della legenda
+                //lineHeight: 20, //Altezza di ogni elemento della legenda (il valore di default è 16)
+                itemStyle: {
+                    cursor: 'pointer',
+                    color: '#666666',
+                    fontSize: '14px',
+                    fontWeight: 300
+                },
+                itemHiddenStyle: { //Colore dell'elemento legenda quando è disattivato
+                    color: '#eeeeee'
+                },
+                itemHoverStyle: { //Colore dell'elemento legenda in rollover
+                    color: '#3ca7da'
+                },
+                navigation: { //Paginazione Legenda - stilizzazione
+                    activeColor: '#3ca7da', //Colore freccia attiva legenda
+                    inactiveColor: '#666666', //Colore freccia disattiva legenda
+                    arrowSize: 8, //Dimensioni freccia
+                    animation: true, //Attiva/Disattiva animazione
+                    style: { //Stile CSS applicato solo alla navigazione della legenda
+                        color: '#666666',
+                        fontSize: '10px'
+                    }
+                }
+            },
+            plotOptions: {
+                series: {
+                    allowPointSelect: true, //Permette di selezionare i punti della chart
+                    //pointPlacement: "on", Per partire dall'origine
+                    animation: { // Configura l'animazione di entrata
+                        duration: 1000,
+                        easing: 'swing'
+                    },
+                    connectNulls: true,
+                    cropThreshold: 3,
+                    lineWidth: 1, // IMPORTANTE - Cambia lo spessore delle linee della chart
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    fillColor: {
+                        linearGradient: [0, 0, 0, 350],
+                        stops: [
+                            [0, 'rgba(55, 155, 205,0.5)'],
+                            [1, 'rgba(255,255,255,0)']
+                        ]
+                    },
+                    marker: {
+                        enabled: false, //Attiva o disattiva i marker
+                        //symbol: 'url(http://www.mentaltoy.com/resources/logoChart.png)', //Questo paramentro carica un simbolo personalizzato. Si può anche avere una chart con marker diverse sulle linee
+                        symbol: 'circle', // Tipologia di marker
+                        radius: 4,
+                        lineWidth: 1,
+                        lineColor: '#379bcd',
+                        fillColor: '#FFFFFF',
+                        states: {
+                            hover: {
+                                enabled: true, // Attiva o disattiva il marker quando si passa sopra la chart
+                                symbol: 'circle',
+                                fillColor: '#FFFFFF',
+                                lineColor: '#3ca7da',
+                                radius: 5,
+                                lineWidth: 2
+                            }
+                        }
+                    }
+                    //cursor: 'cell',// Cambia il cursore on rollover del grafico
+                    //dashStyle: 'ShortDash', //Tipologia di linea (Solid ShortDash ShortDot ShortDashDot ShortDashDotDot Dot Dash LongDash DashDot LongDashDot LongDashDotDot)
+                    /*dataLabels: {
+                     enabled: true, //Attiva le label sopra i punti nel grafico
+                     backgroundColor: '#FFFFFF',
+                     borderRadius: 3,
+                     borderWidth: 1,
+                     borderColor: '#666666'
+
+                     },*/
+                    /*events: {// Aggiunge eventi alla chart
+                     show: function(event) { //Aggiunge evento di quando un elemnto ricompare cliccandolo dalla legenda
+                     alert ('The series was just shown');
+                     }
+                     },*/
+
+                }
+            },
+            //END
+
+
+            title: {
+                //enabled: false,
+                text: this.getLabel(this.model.metadata, 'title'),
+                x: -20 //center
+            },
+            subtitle: {
+                text: null,
+                x: -20
+            },
+            xAxis: {
+                categories: this.xAxis,
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineColor: '#e0e0e0',
+                tickColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                tickLength: 7,
+                //tickmarkPlacement: 'on', Per partire dall'origine
+                labels: {
+                    y: 25,
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                }
+                /*plotLines: [{ //linea custom possono essere anche più di una, è un array
+                 color: '#666666',
+                 width: 1,
+                 value: 11.5,
+                 dashStyle: 'dash',
+                 zIndex: 3
+                 }, { //linea custom possono essere anche più di una, è un array
+                 color: '#FFFFFF',
+                 width: 1,
+                 value: 11.5,
+                 zIndex: 2
+                 }]*/
+            },
+            yAxis: {
+
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineWidth: 1,
+                //tickWidth: 1,
+                lineColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                labels: {
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                },
+                title: {
+                    enabled: false,
+                    text: 'null'
+                },
+                plotLines: [
+                    {
+                        value: 0,
+                        width: 1
+                    }
+                ]
+            },
+            tooltip: {
+                valueSuffix: 'M',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderWidth: 1,
+                shadow: false
+            },
+            series: this.series
+        };
+
+        this.$template.find(this.o.selectors.content.AREA_CHART).highcharts(conf);
+
+    };
+
+    DataSetRender.prototype.buildLineChart = function () {
+
+        var conf = {
+
+            //Line chart
+
+            chart: {
+                type: 'line', //Tipo di grafico:  area, areaspline, boxplot, bubble, column, line, pie, scatter, spline
+
+                alignTicks: false,
+                backgroundColor: '#FFFFFF', //Colore di background
+                //borderColor: '#3fa8da', //Colore bordo intorno
+                //borderWidth: 1, //Spessore bordo intorno
+                //borderRadius: 0, //Smusso bordo intorno
+                //margin: [5,5,5,5], //Margine intorno (vince sullo spacing)
+                spacing: [20, 1, 1, 1],//Spacing intorno (molto simile al margin - Di default il bottom è 15, qui l'ho messo a 10 per essere uguale agli altri)
+                //plotBackgroundColor: 'red', //Colore di background solo area chart
+                plotBorderColor: '#ffffff', //Colore bordo intorno solo area chart
+                plotBorderWidth: 0, //Spessore bordo intorno solo area chart
+                //showAxes: false, //Mostra gli assi quando le serie sono aggiunte dinamicamente
+                style: {
+                    fontFamily: 'Roboto', // Font di tutto
+                    fontSize: '12px', // La dimensione qui vale solo per i titoli
+                    fontWeight: 300 // Con Roboto è molto bello giocare con i pesi
+                },
+                zoomType: 'xy', //Attiva lo zoom e stabilisce in quale dimensione
+                //selectionMarkerFill: 'rgba(0,0,0,0.25)',//Colore di fonfo della selezione per lo zoom (trasparente per far vedere sotto)
+                resetZoomButton: {
+                    position: {
+                        align: 'right', //Allineamento zoom orizzontale
+                        //verticalAlign:'middle' //Allineamento zoom verticale
+                        x: -10 //Posizione del pulsante rispetto all'allineamento (valori positivi > destra) e al PLOT
+
+                    },
+                    theme: {
+                        fill: '#FFFFFF', //Colore di background pulsante reset zoom
+                        stroke: '#666666', //Colore di stroke pulsante reset zoom
+                        width: 60, //Larghezza del pulsante reset
+                        //r:0, //Smusso pulsante reset zoom
+                        style: {
+                            textAlign: 'center', //CSS style aggiunto da me per centrare il testo
+                            fontSize: 10
+                        },
+                        states: {
+                            hover: {
+                                fill: '#e6e6e6', //Colore di background hover pulsante reset zoom
+                                stroke: '#666666', //Colore di stroke hover pulsante reset zoom
+                                style: {
+                                    //color: 'white' //Colore testo hover pulsante reset zoom
+                                }
+                            }
+                        }
+                    }
+
+                }
+            },
+            colors: [ //Colori delle charts
+                '#379bcd',
+                '#76BE94',
+                '#744490',
+                '#E10079',
+                '#2D1706',
+                '#F1E300',
+                '#F7AE3C',
+                '#DF3328'
+            ],
+            credits: {
+                enabled: false //Attiva o disattiva il link di HighCharts dalla chart
+            },
+            exporting: {
+                enabled: false
+            },
+            navigation: { //Modifica lo stile dei bottoni e spesso del solo bottone dell'esportazione (lo sfondo)
+                buttonOptions: {
+                    theme: {
+                        'stroke-width': 1, // Peso stroke del bottone
+                        stroke: '#666666', // Colore stroke del bottone
+                        r: 0, // Smusso stroke del bottone,
+                        states: {
+                            hover: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Rollover del bottone
+                            },
+                            select: {
+                                stroke: '#666666', // Press stroke del bottone
+                                fill: '#e6e6e6' // Press Fill del bottone
+                            }
+                        }
+                    }
+                }
+            },
+            legend: { //Modifica style della legenda
+                enabled: true, //Attiva la legenda
+                floating: false, // IMPORTANTE - Permette alla plot area di stare sotto alla legenda - si guadagna molto spazio
+
+                //margin: 100, //Margine dell'intero blocco legenda dall'area di PLOT (Solo quando non è floating)
+                //padding: 20, //Padding del box legenda (Ingrandisce il box)
+                backgroundColor: '#FFFFFF', //Colore di sfondo della legenda
+                //layout: 'horizontal', //Tipologia di legenda
+                align: 'center', //Allineamento orizzontale del box della legenda (left, center, right)
+                verticalAlign: 'bottom', //allineamento verticale della legenda (top, middle, bottom)
+                //width: 200, //Larghezza della legenda (Aggiunge Margini e padding)
+                //x: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > destra)
+                //y: -8,//Offset della posizione della legenda rispetto all'allineamento (valori positivi > verso il basso)
+                //maxHeight: 90, //IMPORTANTE - Indica l'altezza massima della legenda, se superata, mostra la paginazione (vedi sotto)
+                //borderColor: '#666666', //Colore del bordo della legenda
+                borderWidth: 0, //Spessore bordo della legenda
+                //borderRadius: 3, //Smusso della legenda
+                //itemDistance: 10, //Distanza X degli elementi quando la legenda è in verticale
+                //symbolWidth: 20, //Larghezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 16)
+                //symbolHeight: 20, //Altezza del simbolo rettangolo quando la legenda ne ha uno (accanto al nome - default 12)
+                //symbolRadius: 3, //Smusso del simbolo rettangolo quando la legenda ne ha uno (default 2)
+                symbolPadding: 10, //Distanza tra simbolo e legenda (default 5)
+                //itemMarginBottom: 5, //Margine inferiore di ogni elemento della legenda
+                //itemMarginTop: 5, //Margine superiore di ogni elemento della legenda
+                //lineHeight: 20, //Altezza di ogni elemento della legenda (il valore di default è 16)
+                itemStyle: {
+                    cursor: 'pointer',
+                    color: '#666666',
+                    fontSize: '14px',
+                    fontWeight: 300
+                },
+                itemHiddenStyle: { //Colore dell'elemento legenda quando è disattivato
+                    color: '#eeeeee'
+                },
+                itemHoverStyle: { //Colore dell'elemento legenda in rollover
+                    color: '#3ca7da'
+                },
+                navigation: { //Paginazione Legenda - stilizzazione
+                    activeColor: '#3ca7da', //Colore freccia attiva legenda
+                    inactiveColor: '#666666', //Colore freccia disattiva legenda
+                    arrowSize: 8, //Dimensioni freccia
+                    animation: true, //Attiva/Disattiva animazione
+                    style: { //Stile CSS applicato solo alla navigazione della legenda
+                        color: '#666666',
+                        fontSize: '10px'
+                    }
+                }
+            },
+            plotOptions: {
+                series: {
+                    allowPointSelect: true, //Permette di selezionare i punti della chart
+                    //pointPlacement: "on", Per partire dall'origine
+                    animation: { // Configura l'animazione di entrata
+                        duration: 1000,
+                        easing: 'swing'
+                    },
+                    connectNulls: true,
+                    cropThreshold: 3,
+                    lineWidth: 1, // IMPORTANTE - Cambia lo spessore delle linee della chart
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    fillColor: {
+                        linearGradient: [0, 0, 0, 350],
+                        stops: [
+                            [0, 'rgba(55, 155, 205,0.5)'],
+                            [1, 'rgba(255,255,255,0)']
+                        ]
+                    },
+                    marker: {
+                        enabled: false, //Attiva o disattiva i marker
+                        //symbol: 'url(http://www.mentaltoy.com/resources/logoChart.png)', //Questo paramentro carica un simbolo personalizzato. Si può anche avere una chart con marker diverse sulle linee
+                        symbol: 'circle', // Tipologia di marker
+                        radius: 4,
+                        lineWidth: 1,
+                        lineColor: '#379bcd',
+                        fillColor: '#FFFFFF',
+                        states: {
+                            hover: {
+                                enabled: true, // Attiva o disattiva il marker quando si passa sopra la chart
+                                symbol: 'circle',
+                                fillColor: '#FFFFFF',
+                                lineColor: '#3ca7da',
+                                radius: 5,
+                                lineWidth: 2
+                            }
+                        }
+                    }
+                    //cursor: 'cell',// Cambia il cursore on rollover del grafico
+                    //dashStyle: 'ShortDash', //Tipologia di linea (Solid ShortDash ShortDot ShortDashDot ShortDashDotDot Dot Dash LongDash DashDot LongDashDot LongDashDotDot)
+                    /*dataLabels: {
+                     enabled: true, //Attiva le label sopra i punti nel grafico
+                     backgroundColor: '#FFFFFF',
+                     borderRadius: 3,
+                     borderWidth: 1,
+                     borderColor: '#666666'
+
+                     },*/
+                    /*events: {// Aggiunge eventi alla chart
+                     show: function(event) { //Aggiunge evento di quando un elemnto ricompare cliccandolo dalla legenda
+                     alert ('The series was just shown');
+                     }
+                     },*/
+
+                }
+            },
+            //END
+
+
+            title: {
+                //enabled: false,
+                text: this.getLabel(this.model.metadata, 'title'),
+                x: -20 //center
+            },
+            subtitle: {
+                text: null,
+                x: -20
+            },
+            xAxis: {
+                categories: this.xAxis,
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineColor: '#e0e0e0',
+                tickColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                tickLength: 7,
+                //tickmarkPlacement: 'on', Per partire dall'origine
+                labels: {
+                    y: 25,
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                }
+                /*plotLines: [{ //linea custom possono essere anche più di una, è un array
+                 color: '#666666',
+                 width: 1,
+                 value: 11.5,
+                 dashStyle: 'dash',
+                 zIndex: 3
+                 }, { //linea custom possono essere anche più di una, è un array
+                 color: '#FFFFFF',
+                 width: 1,
+                 value: 11.5,
+                 zIndex: 2
+                 }]*/
+            },
+            yAxis: {
+
+                gridLineWidth: 1, // IMPORTANTE - Attiva le linee verticali
+                lineWidth: 1,
+                //tickWidth: 1,
+                lineColor: '#e0e0e0',
+                gridLineColor: '#eeeeee',
+                labels: {
+                    style: {
+                        color: '#666666',
+                        fontWeight: '300',
+                        fontSize: 12
+                    }
+                },
+                title: {
+                    enabled: false,
+                    text: 'null'
+                },
+                plotLines: [
+                    {
+                        value: 0,
+                        width: 1
+                    }
+                ]
+            },
+            tooltip: {
+                valueSuffix: 'M',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderWidth: 1,
+                shadow: false
+            },
+            series: this.series
+        };
+
+        this.$template.find(this.o.selectors.content.LINE_CHART).highcharts(conf);
+
+    };
+
+    DataSetRender.prototype.buildChart = function ( type ) {
+
+        switch (type){
+            case 'line' : this.buildLineChart(); break;
+            case 'area' : this.buildAreaChart(); break;
+        }
     };
 
     DataSetRender.prototype.renderItem = function (tamplate, item) {
@@ -246,11 +1225,10 @@ define([
         this.$template = tamplate;
         this.model = item.resources[0];
 
-        this.initInnerStructures( this.model );
+        this.initInnerStructures(this.model);
         this.activatePanels();
 
         this.buildTable();
-        this.buildCharts();
 
     };
 
