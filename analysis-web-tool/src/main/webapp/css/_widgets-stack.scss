@@ -5,6 +5,10 @@
   background: url("img/icons-sprite.png") no-repeat -105px -35px ;
 }
 
+.fx-widgetstack-title-container{
+  height: 120px;
+}
+
 #fx-sessionstore-counter-value{
   position: absolute;
   top: 7px;
@@ -35,6 +39,15 @@
 
 .extruder.right {
   height: 100%;
+  .text{
+    width: 100% !important;
+    overflow: visible !important;
+  }
+}
+
+.extruder-content{
+  border: 0 !important;
+  background-color: $black-alpha !important;
 }
 
 .extruder.right .ext_wrapper {
@@ -48,12 +61,12 @@
 
 #fx-ws-close-btn{
   text-transform: uppercase;
-  color: #009966;
+  color: $fenix-standard-blue;
   font-weight: 700;
   width: 280px;
   height: 45px;
   padding: 12px 0 0 45px;
-  border-bottom: 1px solid #009966;
+  border-bottom: 1px solid $fenix-standard-blue;
   cursor: pointer;
   position: absolute;
   top: 0px;
@@ -82,26 +95,24 @@
 
 #fx-sessionstore-ul-container{
   position: relative;
-  top: 120px;
-  overflow-y: auto;
   overflow-x: hidden;
 }
 
-#fx-sessionstore-list{
+#fx-ws-list{
   width:280px;
   padding-left: 0px;
 }
 
-#fx-sessionstore-list li {
+#fx-ws-list li {
   list-style-type:none;
   width:280px;
   padding:16px 16px 35px 16px;
   position: relative;
+  border-bottom: 1px solid $fenix-standard-blue;
 }
 
 
-/* Stack item */
-.fx-sessionstore-item {border-bottom: 1px solid #009966;}
+
 /*.fx-sessionstore-item-icon {
   width: 50px;
   height: 50px;

@@ -7,9 +7,9 @@ $standard-text : normal normal 300 14px/normal 'Roboto Condensed';
 
 
 a {
-  color: red;
+  color: $fenix-gray-text;
   &:hover {
-    color: blue;
+    color: $fenix-standard-blue !important;
     @include animate;
   }
 }

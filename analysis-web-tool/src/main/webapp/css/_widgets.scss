@@ -44,6 +44,32 @@
   background: url("img/drag.png");
 }
 
+.fx-analysis-item{
+  padding-bottom: 20px;
+}
+
+.widget-grid-container{
+  padding: 8px 10px;
+}
+
+.fx-analysis-item{
+  padding: 10px;
+}
+
+
+.nav-tabs{
+  border-bottom: transparent;
+  li {
+    a{
+      cursor: pointer;
+    }
+  }
+}
+
+.tab-content{
+  padding-top: 10px;
+}
+
 /* Icons Standard state */
 .fx-icon-clone{
   background: url("img/icons-sprite.png") no-repeat -350px 0px;

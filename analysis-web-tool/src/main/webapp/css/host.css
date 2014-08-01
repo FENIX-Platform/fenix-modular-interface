@@ -6,6 +6,13 @@ html, body {
 body {
   padding-top: 70px; }
 
+.fx-analysis-page-title {
+  font-weight: 100;
+  color: #666666; }
+
+.fx-analysis-page-description {
+  color: #666666; }
+
 /*================= Packry =================*/
 .fx-analysis-item {
   width: 50%; }
@@ -22,7 +29,7 @@ body {
   width: 0;
   height: 0;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   padding-top: 70px;
   z-index: 500;
   overflow-y: scroll; }

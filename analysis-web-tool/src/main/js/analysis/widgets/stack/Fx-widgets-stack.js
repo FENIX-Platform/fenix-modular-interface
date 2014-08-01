@@ -17,11 +17,11 @@ define([
             interaction: "click",
             panel: {
                 positionFixed: true,
-                width: 350,
                 sensibility: 800,
                 position: "right", // left, right, bottom
-                extruderOpacity: 1,
-                flapDim: 100,
+                extruderOpacity: .5,
+                width: 280,
+                //flapDim: 100,
                 textOrientation: "bt", // or "tb" (top-bottom or bottom-top)
                 onExtOpen: function () {
                 },
