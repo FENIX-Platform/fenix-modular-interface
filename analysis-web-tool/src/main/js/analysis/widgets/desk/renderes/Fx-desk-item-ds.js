@@ -2,7 +2,8 @@
 
 define([
     'jquery',
-    'jqwidgets'
+    'jqwidgets',
+    'highcharts'
 ], function ($) {
 
     'use strict';
@@ -15,16 +16,16 @@ define([
         VALUES: 'values',
         DATA: 'data',
         COLUMN_ID: "columnId",
-        tabs: ['metadata', 'table'],
+        tabs: ['metadata', 'table', 'charts'],
         selectors: {
-            content : {
-                METADATA : ".tab-metadata-container",
-                MAP : ".tab-map-container",
-                TABLE : ".tab-table-container",
-                COLUMN_CHART : ".tab-table-container",
-                BAR_CHART : ".tab-columnchart-container",
-                LINE_CHART : ".tab-linechart-container",
-                PIE_CHART : ".tab-piechart-container"
+            content: {
+                METADATA: ".tab-metadata-container",
+                MAP: ".tab-map-container",
+                TABLE: ".tab-table-container",
+                COLUMN_CHART: ".tab-columnchart-container",
+                BAR_CHART: ".tab-barchart-container",
+                LINE_CHART: ".tab-linechart-container",
+                PIE_CHART: ".tab-piechart-container"
             }
         },
         events: {
@@ -83,6 +84,10 @@ define([
         return this.data;
     };
 
+    DataSetRender.prototype.getTitle = function () {
+        return this.model.metadata
+    };
+
     DataSetRender.prototype.getDataFields = function () {
         return this.dataFields;
     };
@@ -100,37 +105,31 @@ define([
 
     DataSetRender.prototype.getColumnLabel = function (column) {
 
-        var label = 'not defined',
+        var label =  this.getLabel(column, "title");
+
+        if (label === null) {
+            if (column.hasOwnProperty("dimension") && column.dimension !== null) {
+                label = this.getLabel(column.dimension, "title");
+            }
+        }
+        return label;
+    };
+    
+    DataSetRender.prototype.getLabel = function (obj, attribute) {
+
+        var label= "not defined",
             keys;
 
-        if (column.hasOwnProperty("title") && column.title !== null) {
+        if (obj.hasOwnProperty(attribute) && obj.title !== null) {
 
-            if (column.title.hasOwnProperty('EN')) {
-                label = column.title['EN'];
+            if (obj[attribute].hasOwnProperty('EN')) {
+                label = obj[attribute]['EN'];
             } else {
 
-                keys = Object.keys(column.title);
+                keys = Object.keys(obj[attribute]);
 
                 if (keys.length > 0) {
-                    label = column.title[ keys[0] ];
-                }
-            }
-        } else {
-
-            if (column.hasOwnProperty("dimension") && column.dimension !== null) {
-
-                if (column.dimension.hasOwnProperty("title") && column.dimension.title !== null) {
-
-                    if (column.dimension.title.hasOwnProperty('EN')) {
-                        label = column.dimension.title['EN'];
-                    } else {
-
-                        keys = Object.keys(column.dimension.title);
-
-                        if (keys.length > 0) {
-                            label = column.dimension.title[ keys[0] ];
-                        }
-                    }
+                    label = obj[attribute][ keys[0] ];
                 }
             }
         }
@@ -138,11 +137,12 @@ define([
         return label;
     };
 
-    DataSetRender.prototype.initInnerStructures = function (item) {
+    DataSetRender.prototype.initInnerStructures = function () {
+
+        console.log(this.model)
 
         //Select the first resource. We can create just one table here
-        this.resource = item[this.o.RESOURCES][0];
-        this.dsd = this.resource[this.o.DSD];
+        this.dsd = this.model[this.o.DSD];
         this.visibleColumns = [];
         this.hiddenColumns = [];
         this.columnsCodeMapping = {};
@@ -156,14 +156,14 @@ define([
         }
 
         this.data = [];
-        this.rawData = this.resource[this.o.DATA];
+        this.rawData = this.model[this.o.DATA];
     };
 
     DataSetRender.prototype.activatePanels = function () {
 
         this.$template.find("li[data-tab]").hide();
-        for (var i = 0; i < this.o.tabs.length; i++){
-            this.$template.find("li[data-tab='"+ this.o.tabs[i]+"']").show();
+        for (var i = 0; i < this.o.tabs.length; i++) {
+            this.$template.find("li[data-tab='" + this.o.tabs[i] + "']").show();
         }
 
     };
@@ -187,14 +187,69 @@ define([
 
     };
 
+    DataSetRender.prototype.buildCharts = function () {
+
+        var conf = {
+            title: {
+                text: 'Monthly Average Temperature',
+                x: -20 //center
+            },
+            xAxis: {
+                categories: [2000, 2001, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct']
+            },
+            yAxis: {
+                title: {
+                    text: 'Quantity'
+                },
+                plotLines: [
+                    {
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }
+                ]
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [
+                {
+                    name: 'Tokyo',
+                    data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+                },
+                {
+                    name: 'New York',
+                    data: [-0.2, 0.8, 5.7, 11.3, 17.0, 22.0, 24.8, 24.1, 20.1, 14.1, 8.6, 2.5]
+                },
+                {
+                    name: 'Berlin',
+                    data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
+                },
+                {
+                    name: 'London',
+                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+                }
+            ]
+        };
+
+        this.$template.find(this.o.selectors.content.COLUMN_CHART).highcharts(conf);
+
+    };
+
     DataSetRender.prototype.renderItem = function (tamplate, item) {
 
         this.$template = tamplate;
+        this.model = item.resources[0];
 
-        this.initInnerStructures(item);
+        this.initInnerStructures( this.model );
         this.activatePanels();
 
         this.buildTable();
+        this.buildCharts();
 
     };
 

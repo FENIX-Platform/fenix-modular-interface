@@ -14,6 +14,7 @@ define(function () {
         'fx-ana/start': './start',
         'jquery': 'lib/jquery',
         'pnotify': 'lib/pnotify',
+        'highcharts' : 'http://code.highcharts.com/highcharts',
         'jqwidgets': "http://fenixapps.fao.org/repository/js/jqwidgets/3.1/jqx-all",
         'jqueryui': "http://code.jquery.com/ui/1.10.3/jquery-ui.min"
     };
@@ -45,7 +46,9 @@ define(function () {
         var config = {
             paths: fullpaths,
             shim: {
-
+                'highcharts' : {
+                    deps: ['jquery']
+                },
                 'jqwidgets' : {
                     deps: ['jquery']
                 },
