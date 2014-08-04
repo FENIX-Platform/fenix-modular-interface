@@ -100,12 +100,14 @@ define([
 
         for (var i = 0; i < this.rawData.length; i++) {
 
+            var r = this.rawData[i].slice(0);
+
             //generate Series
-            this.updateSeries(this.rawData[i]);
+            this.updateSeries( r );
 
             //remove hidden columns
             for (var j = 0; j < this.indexesToDelete.length; j++) {
-                this.rawData[i].splice(this.indexesToDelete[j] - j, 1)
+                r.splice(this.indexesToDelete[j] - j, 1);
             }
 
             //create jQWidgets model
@@ -113,9 +115,9 @@ define([
             for (j = 0; j < this.visibleColumns.length; j++) {
 
                 if (this.visibleColumns[j].dataType === 'code') {
-                    d[this.dataFields[j].name] = this.rawData[i][j] + ' - ' + this.columnsCodeMapping[this.visibleColumns[j].columnId][this.rawData[i][j]];
+                    d[this.dataFields[j].name] = r[j] + ' - ' + this.columnsCodeMapping[this.visibleColumns[j].columnId][r[j]];
                 } else {
-                    d[this.dataFields[j].name] = this.rawData[i][j]
+                    d[this.dataFields[j].name] = r[j]
                 }
             }
 
@@ -1220,9 +1222,9 @@ define([
         }
     };
 
-    DataSetRender.prototype.renderItem = function (tamplate, item) {
+    DataSetRender.prototype.renderItem = function (template, item) {
 
-        this.$template = tamplate;
+        this.$template = template;
         this.model = item.resources[0];
 
         this.initInnerStructures(this.model);

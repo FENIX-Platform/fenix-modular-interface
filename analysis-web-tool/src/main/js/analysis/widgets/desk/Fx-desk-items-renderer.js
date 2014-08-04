@@ -89,6 +89,7 @@ define([
 
         this.$template.find(this.o.selectors.buttons.RESIZE + this.id).on(this.o.interaction, {self: this}, function (e) {
             $(this).trigger(e.data.self.o.events.RESIZE_ITEM, [e.data.self.container.parentNode]);
+            $(this).resize();
         });
 
         this.$template.find(this.o.selectors.buttons.MINIMIZE + this.id).on(this.o.interaction, {self: this}, function (e) {
