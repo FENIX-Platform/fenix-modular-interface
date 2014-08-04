@@ -2,6 +2,8 @@
 Produced By Fenix Team and Mentaltoy
 2014 All rights riserved */
 /* Animations */
+/* Shadow */
+/* Boreder Radius */
 /* Fenix Colors */
 /* Typography */
 a {
@@ -15,6 +17,9 @@ a {
     transition: all 0.3s ease 0s; }
 
 /* Fenix Menu */
+hr {
+  border-color: #666666; }
+
 /* Widgets container
 -------------------------------------------------- */
 .fx-widget {

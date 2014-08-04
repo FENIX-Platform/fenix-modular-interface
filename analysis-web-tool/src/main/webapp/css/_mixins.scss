@@ -35,3 +35,19 @@
   -o-transition-timing-function: cubic-bezier(0.715, 0.010, 0.035, 1.010);
   transition-timing-function: cubic-bezier(0.715, 0.010, 0.035, 1.010); /* custom */
 }
+
+/* Shadow */
+
+@mixin box-shadow($top, $left, $blur, $color, $inset:"") {
+  -webkit-box-shadow:$top $left $blur $color #{$inset};
+  -moz-box-shadow:$top $left $blur $color #{$inset};
+  box-shadow:$top $left $blur $color #{$inset};
+}
+
+/* Boreder Radius */
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  -ms-border-radius: $radius;
+  border-radius: $radius;
+}

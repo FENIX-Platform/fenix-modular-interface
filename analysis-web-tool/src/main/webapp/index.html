@@ -92,18 +92,20 @@
 
         </div>
 
-        <div class="row">
+        <div class="row fx-catalog-toolbar">
 
             <div class="col-xs-6">
-                <button id="btn" type="button" class="btn btn-default">CATALOG</button>
+                <button id="btn" type="button" class="btn btn-default">OPEN CATALOG</button>
             </div>
 
-            <div class="col-xs-6">
-                <input id="fx-widgets-stack-btn" type='button' onclick='$("#fx-widgets-stack").openMbExtruder(true);' value='Open'>
-                <input type='button' onclick='$("#fx-widgets-stack").closeMbExtruder();' value='Close'>
+            <div class="col-xs-6 fx-widget-stack-btns">
+                Widgets in the stack <em>0</em>
+                <input class="btn " id="fx-widgets-stack-btn" type='button' onclick='$("#fx-widgets-stack").openMbExtruder(true);' value='OPEN STACK'>
+                <!--input class="btn fx-widget-stack-btn" type='button' onclick='$("#fx-widgets-stack").closeMbExtruder();' value='Close'-->
             </div>
 
         </div>
+
 
         <div class="row">
 
@@ -120,7 +122,7 @@
 
     <!-- FENIX Catalog Overlay -->
     <div id="overlay">
-        <button class="closeOverlay">Close</button>
+        <button class="closeOverlay"></button>
 
         <div class="overlay-content">
             <div id="catalogContainer"></div>
