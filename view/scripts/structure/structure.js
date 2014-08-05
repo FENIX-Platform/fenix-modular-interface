@@ -21,6 +21,7 @@ define([
             affix: "affix",
             menu: "bs-docs-sidebar",
             list: "nav bs-docs-sidenav",
+            sublist : "nav",
             active: "active"
         },
         json: {
@@ -104,7 +105,7 @@ define([
         // Bind to State Change
         History.Adapter.bind(window, 'statechange', function () {
 
-            if (self.manualStateChange === false) {
+            if (self.manualStateChange === false || self.manualStateChange === undefined) {
                 self.configure(History.getState().data);
             }
             self.manualStateChange = false;
@@ -196,10 +197,11 @@ define([
         $li.append($a);
         // end anchor
 
-        if (element.hasOwnProperty(fields.children)) {
+        if (element.hasOwnProperty(fields.children) && element[fields.children].length > 0) {
 
             var $ul = $('<ul></ul>');
-            $ul.addClass(this.options.css.list);
+            $ul.addClass(this.options.css.sublist);
+
 
             $(element[fields.children]).each(function (index, element) {
                 self.addMenuItem($ul, element);
@@ -312,6 +314,9 @@ define([
                             if (typeof callback === 'function') {
                                 callback();
                             }
+                        },
+                        error : function(){
+                            alert("errpr")
                         }
                     });
                 }
@@ -383,8 +388,11 @@ define([
                         href = self.currentSection;
 
                     data[self.options.url.page] = State.data[self.options.url.page];
-                    data[self.options.url.section] = href.substring(1, href.length);
 
+                    if (href !== undefined){
+                        data[self.options.url.section] = href.substring(1, href.length);
+                    } 
+                  
                     self.manualStateChange = true;
                     History.pushState(data, null, self.obj2querySting(data));
                     self.manualStateChange = false;

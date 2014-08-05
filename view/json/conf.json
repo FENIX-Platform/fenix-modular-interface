@@ -35,7 +35,6 @@
             {
                 "id": "id",
                 "page": "event_pg_1",
-                "target": "#sezione",
                 "label": {
                     "EN": "Item 1",
                     "IT": "Elemento 1"
@@ -73,7 +72,6 @@
             },
             {
                 "page": "event_pg_2",
-                "target": "#sezione",
                 "label": {
                     "EN": "Item 2",
                     "IT": "Elemento 2"
